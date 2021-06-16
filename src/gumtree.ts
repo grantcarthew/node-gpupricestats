@@ -1,27 +1,6 @@
 import fetch, { Response } from "node-fetch"
 import config from "./config.js";
-export interface QueryResult {
-  data: Data;
-}
-
-export interface Data {
-  pager: Pager;
-  results: Results;
-}
-
-export interface Pager {
-  numFound: number
-  lastPageNum: number
-}
-
-export interface Results {
-  resultList: Array<Advert>
-}
-
-export interface Advert {
-  title: string
-  priceText: string
-}
+import { Gumtree } from "./types"
 
 export async function GumtreeQuery() {
 
@@ -32,7 +11,7 @@ export async function GumtreeQuery() {
 
   console.log("Getting first page...");
   const res: Response = await fetch(pageUrl);
-  const jsonResult: QueryResult = await res.json();
+  const jsonResult: Gumtree.QueryResult = await res.json();
   let resultList = jsonResult.data.results.resultList;
   const totalPages: number = 0 + jsonResult.data.pager.lastPageNum;
 
@@ -66,7 +45,7 @@ export async function GumtreeQuery() {
   const avgPrice = Math.round(((total / resultList.length) + Number.EPSILON) * 100) / 100
 
 
-  function filter(advert: Advert) {
+  function filter(advert: Gumtree.Advert) {
     for (const word of filterWords) {
       if (advert.title.toUpperCase().includes(word)) return false;
     }

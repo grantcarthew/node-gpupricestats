@@ -1,5 +1,8 @@
 import { GumtreeQuery } from "./gumtree.js"
-const now = new Date()
+import { insertGpuData } from "./dynamodb.js";
+const dateTime = (new Date()).toISOString()
 const result = await GumtreeQuery()
-const item = { date: now.toISOString(), ...result };
+const item = { dateTime, ...result };
+await insertGpuData(item)
+
 console.log('Data item', item);
