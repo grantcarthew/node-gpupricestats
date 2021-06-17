@@ -1,21 +1,32 @@
 import fetch, { Response } from "node-fetch"
 import config from "./config.js";
-import { Gumtree } from "./types"
+import { insertGpuData } from "./dynamodb.js";
+import { Gumtree, Source } from "./types"
 
-export async function GumtreeQuery() {
+export async function gumtreeQuery() {
 
-  console.log("Gumtree GPU Status");
+  console.log("Gumtree GPU Price Query");
 
   let pageUrl: string = config.urls.gumtree;
+  const dateTime = (new Date()).toISOString()
+  const source: Source = "gt";
   const { filterWords }: { filterWords: Array<string> } = config;
 
   console.log("Getting first page...");
-  const res: Response = await fetch(pageUrl);
-  const jsonResult: Gumtree.QueryResult = await res.json();
+  let res: Response
+  let jsonResult: Gumtree.QueryResult
+  try {
+    res = await fetch(pageUrl);
+    jsonResult = await res.json();
+  } catch (err) {
+    console.log('The following error occured when sending Gumtree REST request:');
+    console.error(err);
+    return
+  }
   let resultList = jsonResult.data.results.resultList;
   const totalPages: number = 0 + jsonResult.data.pager.lastPageNum;
 
-  console.log(`Total number summary: ${jsonResult.data.pager.numFound}`);
+  console.log(`Reported count: ${jsonResult.data.pager.numFound}`);
   console.log(`Number of pages: ${totalPages}`);
 
   let pageString = "pageNum=1";
@@ -34,15 +45,15 @@ export async function GumtreeQuery() {
     }
   }
 
-  console.log("Total before filter: " + resultList.length);
+  console.log("Count before word filter: " + resultList.length);
   resultList = resultList.filter(filter);
-  console.log("Total after filter: " + resultList.length);
+  console.log("Count after word filter: " + resultList.length);
 
-  let total = 0
+  let totalPrice = 0
   for (const advert of resultList) {
-    total += +advert.priceText.replace(/\D/g,'')
+    totalPrice += +advert.priceText.replace(/\D/g, '')
   }
-  const avgPrice = Math.round(((total / resultList.length) + Number.EPSILON) * 100) / 100
+  const avgPrice = Math.round(((totalPrice / resultList.length) + Number.EPSILON) * 100) / 100
 
 
   function filter(advert: Gumtree.Advert) {
@@ -52,8 +63,7 @@ export async function GumtreeQuery() {
     return true;
   }
 
-  return {
-    avgPrice,
-    count: resultList.length
-  }
+  const item = { dateTime, source, avgPrice, count: resultList.length };
+  console.log('Gumtree GPU data item:', item);
+  await insertGpuData(item)
 }

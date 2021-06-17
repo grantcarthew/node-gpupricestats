@@ -4,5 +4,5 @@ WORKDIR /app
 COPY package.json .
 RUN npm --no-update-notifier install
 ADD ./dist/. .
-CMD npm --no-update-notifier start
+CMD node main.js
 

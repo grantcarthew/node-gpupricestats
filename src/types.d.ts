@@ -25,6 +25,9 @@ export namespace Gumtree {
 
 export interface GpuPriceData {
   dateTime: string
+  source: Source
   count: number
   avgPrice: number
 }
+
+export type Source = "gt"
