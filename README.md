@@ -1,4 +1,4 @@
-# GpuPricingStats
+# GpuPriceStats
 
 ## Terraform
 
