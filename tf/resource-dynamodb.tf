@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "basic-dynamodb-table" {
+resource "aws_dynamodb_table" "main" {
   name           = "gpupricestats"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "dateTime"
